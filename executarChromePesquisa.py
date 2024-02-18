@@ -21,4 +21,6 @@ time.sleep(1)
 campo_pesquisa.send_keys(Keys.RETURN)
 
 # Espera um pouco para que os resultados da pesquisa apareçam
-time.sleep(5)
+time.sleep(8)
+
+driver.quit()
