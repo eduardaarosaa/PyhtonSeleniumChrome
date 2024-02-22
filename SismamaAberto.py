@@ -1,29 +1,36 @@
-import ctypes
 import time
 from pyautogui import moveTo, click, position
+from pywinauto.application import Application
 import pyautogui
 
-
-def procurar_sismama():
-    time.sleep(3)
-    postion_app_fixo = pyautogui.position()
-    print(postion_app_fixo)
+def clicarMenu():
     
-    # pyautogui.moveTo(-1109,303)
+    time.sleep(5)
+        
+app = Application().connect(title="Coordenação Municipal - v.4.18")
+
+# Selecione a janela principal do programa
+janela_principal = app.window(title="Coordenação Municipal - v.4.18")
+
+# Clique no menu "Cadastro"
+janela_principal.menu_select("Cadastro")
+    
+    
+    # menu = pyautogui.position()
+    # pyautogui.moveTo(-646, 267, duration=1)
+    # time.sleep(5)
+    # pyautogui.doubleClick()
     # pyautogui.click()
-    
-    # pyautogui.moveTo(-1077,354);
-    # pyautogui.click();
-    
-    menu_principal_position = pyautogui.locateOnScreen('menuCadastro.png')
-    
-    if menu_principal_position is not None:
-        pyautogui.click(menu_principal_position)
+    # print('AQUI')
+    # print(menu);
+    # x_input, y_input = -1100, 195
+    # menu = pyautogui.position()
+    # print(menu);
+    # pyautogui.click(x_input, y_input)
 
-        # Aguarde um pequeno período de tempo para o submenu abrir
-        time.sleep(1)
-    else:
-        print("Menu principal não encontrado.")
-    
-    
-procurar_sismama(); 
+    # # Digita o texto desejado
+    # texto = "Olá, mundo!"
+    # pyautogui.typewrite(texto)
+
+clicarMenu()
+   
