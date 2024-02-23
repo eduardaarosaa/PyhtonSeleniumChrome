@@ -38,8 +38,7 @@ def menu_item_seguimento():
         time.sleep(1)
         pyautogui.click()
         time.sleep(5)
-        menu_item = pyautogui.position();
-        print(menu_item);
+      
             
     except Exception as e:
         print(f"Erro ao selecionar o item seguimento do menu: {e}")    
@@ -48,8 +47,9 @@ def novo_cadastro_paciente():
     
     try:
         pyautogui.moveTo(x=1017,y=89)
-        time.sleep(1)
+        time.sleep(3)
         pyautogui.click()
+        time.sleep(3)
             
     except Exception as e:
         print(f"Erro ao selecionar o item novo em cadastro de paciente: {e}")  
@@ -58,7 +58,7 @@ def excel_dados_paciente():
     try: 
         caminho_arquivo_excel = 'Sismama.xlsx'
         dados_excel = pd.read_excel(caminho_arquivo_excel)
-        # print(dados_excel.head())
+        print(dados_excel.head())
         return dados_excel.head()
     
     except Exception as e: 
@@ -66,24 +66,66 @@ def excel_dados_paciente():
 
 def dados_processamento_excel(dados_excel):
     try:
+       time.sleep(3)
        cadastro_dados_paciente(dados_excel)
-       cadastro_dados_residenciais(dados_excel)
-       cadastro_dados_risco_elevado(dados_excel)
+    #    cadastro_dados_residenciais(dados_excel)
+    #    cadastro_dados_risco_elevado(dados_excel)
       
     except Exception as e: 
         print(f"Erro ao processar os dados do excel: {e}")  
         
-def cadastro_dados_paciente():
+def cadastro_dados_paciente(dados_excel):
     try: 
         #campos
-        cartao_sus = dados_excel['cartao sus']
-        nome = dados_excel['nome']
+        cartao_sus = dados_excel['cartao sus'].astype(str).tolist()
+        nome = dados_excel.loc[0, 'nome']
         sexo = dados_excel['sexo']
-        mae = dados_excel['mae']
-        identidade = dados_excel['identidade']
-        cpf = dados_excel['cpf']
-        idade = dados_excel['idade']
+        nome_mae = dados_excel.loc[0, 'mae']
+        identidade = dados_excel.loc[0, 'identidade']
+        cpf = dados_excel.loc[0, 'cpf']
+        idade = dados_excel.loc[0, 'idade']
+        
+        time.sleep(0.5)
+        #cartao sus
+        pyautogui.click(418,100)
+        pyautogui.write(cartao_sus, interval=0.1)
+        
+        time.sleep(0.5)
+        
+        #nome
+        pyautogui.click(581,119)
+        pyautogui.write(nome, interval=0.1)
+        print(nome, 'Nome paciente')
+        
+        time.sleep(0.5)
+        
+        # tratativa_sexo(sexo)
+        
+        #nome_mae
+        pyautogui.click(463,149)
+        pyautogui.write(nome_mae, interval=0.1)
+        
+        time.sleep(0.5)
     
+        #identidade
+        pyautogui.click(440,165)
+        pyautogui.write(str(identidade), interval=0.1) 
+        
+        time.sleep(0.5)
+        
+        #cpf
+        pyautogui.click(421,187)
+        pyautogui.write(str(cpf), interval=0.1) 
+        
+        time.sleep(3)
+        
+        menu_item = pyautogui.position();
+        print(menu_item);
+    
+        #idade
+        pyautogui.click(699,191)
+        pyautogui.write(str(idade), interval=0.1) 
+     
     except Exception as e: 
         print(f"Erro ao processar os dados do paciente no novo cadastro: {e}")  
         
@@ -105,7 +147,20 @@ def cadastro_dados_risco_elevado():
     
     except Exception as e: 
         print(f"Erro ao processar os dados de risco elevado no novo cadastro do paciente: {e}")  
-   
+        
+def tratativa_sexo():
+    try: 
+        sexo = 'F'
+        if sexo == 'F' :
+            pyautogui.moveTo()
+            pyautogui.click() 
+        else:
+            pyautogui.moveTo()
+            pyautogui.click() 
+    except Exception as e: 
+        print(f"Erro ao tratar os dados do paciente no campo sexo {e}")  
+        
+        
 if __name__ == "__main__":
     # Caminho para o programa que você deseja abrir como administrador
     caminho_programa = r'C:\datasus\SisMamaFB\SisMamaFB.exe'
@@ -128,9 +183,9 @@ if __name__ == "__main__":
 
     # Executando o programa como administrador
     run_as_admin(caminho_programa)
-    # menu_item_position()
-    # menu_item_seguimento()
-    # novo_cadastro_paciente()
+    menu_item_position()
+    menu_item_seguimento()
+    novo_cadastro_paciente()
     dados_excel = excel_dados_paciente()
     dados_processamento_excel(dados_excel)
     
