@@ -48,8 +48,13 @@ def novo_cadastro_paciente():
         pyautogui.moveTo(x=1017,y=89)
         time.sleep(3)
         pyautogui.click()
-        time.sleep(3)
-            
+        time.sleep(5)
+        
+        print('aquiiiiiiiii')
+        
+        posicao = pyautogui.position()
+        print(posicao)
+        
     except Exception as e:
         print(f"Erro ao selecionar o item novo em cadastro de paciente: {e}")  
           
@@ -272,42 +277,39 @@ def cadastro_aba_mamografia(dados_excel):
         mama_direita = dados_excel.loc[0, 'mama direita']
         mama_esquerda = dados_excel.loc[0, 'mama esquerda']
         categoria_direita = dados_excel.loc[0, 'categoria direita']
-        categria_eesquerda = dados_excel.loc[0, 'categoria esquerda']
+        categoria_esquerda = dados_excel.loc[0, 'categoria esquerda']
         
-        # Preencher CNES
-        pyautogui.click(849, 298)
+        #CNES
+        pyautogui.click(408, 447)
         pyautogui.write(str(cnes), interval=0.1)
         pyautogui.press('enter') 
-        
+          
         # Serviço radiologico
-        pyautogui.click(849, 298) #coordenadas precisam confirmar 
-        pyautogui.write(str(servico_radiologico), interval=0.1)
-        pyautogui.press('enter') 
+        pyautogui.click(936, 438)
+        pyautogui.click(936, 438)
+        # pyautogui.write(str(servico_radiologico), interval=0.1)
+        # pyautogui.press('enter') 
         
         tratativa_localizacao_mamografia(localizacao_mama)
         tratativa_tipo_mamografia(tipo_mamografia)
         
         # número do exame 
-        pyautogui.click(849, 298) #coordenadas precisam confirmar 
+        pyautogui.click(921,493) 
         pyautogui.write(str(numero_exame), interval=0.1)
         
         # mama direita
-        pyautogui.click(849, 298) #coordenadas precisam confirmar 
+        pyautogui.click(450, 532)
         pyautogui.write(str(mama_direita), interval=0.1)
         pyautogui.press('enter') 
         
         # mama esquerda
-        pyautogui.click(849, 298) #coordenadas precisam confirmar 
+        pyautogui.click(797, 536) 
         pyautogui.write(str(mama_esquerda), interval=0.1)
         pyautogui.press('enter') 
         
-        # catergoria direita
-        pyautogui.click(849, 298) #coordenadas precisam confirmar 
-        pyautogui.write(str(numero_exame), interval=0.1)
-        
-        # catergoria esquerda
-        pyautogui.click(849, 298) #coordenadas precisam confirmar 
-        pyautogui.write(str(numero_exame), interval=0.1)
+        tratativa_categoria_mamografia_direta(categoria_direita)
+        tratativa_categoria_mamografia_esquerda(categoria_esquerda)
+  
         
     
     except Exception as e: 
@@ -316,14 +318,14 @@ def cadastro_aba_mamografia(dados_excel):
 def tratativa_localizacao_mamografia(localizacao_mama):
     try:
         if(localizacao_mama == 'direita'):
-            pyautogui.moveTo()
+            pyautogui.moveTo(348,494)
             pyautogui.click()
         elif(localizacao_mama == 'esquerda'):
-             pyautogui.moveTo()
+             pyautogui.moveTo(449,501)
              pyautogui.click()
         else:
             #ambas
-             pyautogui.moveTo()
+             pyautogui.moveTo(547,497)
              pyautogui.click()
     
     except Exception as e: 
@@ -332,15 +334,70 @@ def tratativa_localizacao_mamografia(localizacao_mama):
 def tratativa_tipo_mamografia(tipo):
     try:
         if(tipo == 'diagnostica'):
-            pyautogui.moveTo()
+            pyautogui.moveTo(667,495)
             pyautogui.click()
-        elif(tipo == 'restreamento'):
-             pyautogui.moveTo()
+        elif(tipo == 'rastreamento'):
+             pyautogui.moveTo(755,498)
              pyautogui.click()
     
     except Exception as e: 
-        print(f"Erro ao tratar os dados do paciente - Aba mamografia {e}")
+        print(f"Erro ao tratar os dados do paciente - Aba mamografia (Tipo mamografia) {e}")
 
+def tratativa_categoria_mamografia_direta(categoria):
+    try:
+        if(categoria == 0):
+            pyautogui.moveTo(445,592)
+            pyautogui.click()
+        elif(categoria == 1):
+             pyautogui.moveTo(443,610)
+             pyautogui.click()
+        elif(categoria == 2):
+             pyautogui.moveTo(446,626)
+             pyautogui.click()
+        elif(categoria == 3):
+             pyautogui.moveTo(444,643)
+             pyautogui.click()
+        elif(categoria == 4):
+             pyautogui.moveTo(445,657)
+             pyautogui.click()
+        elif(categoria == 5):
+             pyautogui.moveTo(445,675)
+             pyautogui.click()
+        else:
+             pyautogui.moveTo(443,688)
+             pyautogui.click()
+    
+    except Exception as e: 
+        print(f"Erro ao tratar os dados do paciente - Aba mamografia (Categoria Mama direita) {e}")
+
+
+def tratativa_categoria_mamografia_esquerda(categoria):
+    try:
+        if(categoria == 0):
+            pyautogui.moveTo(854,594)
+            pyautogui.click()
+        elif(categoria == 1):
+             pyautogui.moveTo(854,609)
+             pyautogui.click()
+        elif(categoria == 2):
+             pyautogui.moveTo(856,626)
+             pyautogui.click()
+        elif(categoria == 3):
+             pyautogui.moveTo(854,640)
+             pyautogui.click()
+        elif(categoria == 4):
+             pyautogui.moveTo(853,661)
+             pyautogui.click()
+        elif(categoria == 5):
+             pyautogui.moveTo(853,674)
+             pyautogui.click()
+        else:
+             pyautogui.moveTo(853,691)
+             pyautogui.click()
+    
+    except Exception as e: 
+        print(f"Erro ao tratar os dados do paciente - Aba mamografia (Categoria Mama esquerda) {e}")
+        
         
 if __name__ == "__main__":
     # Caminho para o programa que você deseja abrir como administrador
