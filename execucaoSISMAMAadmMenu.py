@@ -4,9 +4,15 @@ from pyautogui import moveTo, click, position
 import pyautogui
 from pywinauto.application import Application
 import pandas as pd 
+import datetime
+import csv
+import pytesseract
 
 # Constantes da API do Windows
 SW_RESTORE = 9
+localizacao_sismama = None
+dados_retorno_csv = []
+
 
 def run_as_admin(program):
     try:
@@ -49,12 +55,6 @@ def novo_cadastro_paciente():
         time.sleep(3)
         pyautogui.click()
         time.sleep(5)
-        
-        print('aquiiiiiiiii')
-        
-        posicao = pyautogui.position()
-        print(posicao)
-        
     except Exception as e:
         print(f"Erro ao selecionar o item novo em cadastro de paciente: {e}")  
           
@@ -63,22 +63,34 @@ def excel_dados_paciente():
         caminho_arquivo_excel = 'Sismama.csv'
         dados_excel = pd.read_csv(caminho_arquivo_excel)
         print(dados_excel.head())
-        return dados_excel.head()
+        return dados_excel
     
     except Exception as e: 
         print(f"Erro ao procurar o Excel: {e}")  
+        
+def processar_pacientes_csv():
+    dados_pacientes = excel_dados_paciente()
 
-def dados_processamento_excel(dados_excel):
+    if dados_pacientes is not None:
+        try:
+            for index, row in dados_pacientes.iterrows():
+                novo_cadastro_paciente()
+                dados_processamento_excel(row)
+        except Exception as e:
+            print(f"Erro ao processar os dados do excel: {e}")
+
+
+def dados_processamento_excel(paciente):
     try:
-       time.sleep(3)
-       cadastro_dados_paciente(dados_excel)
-       cadastro_dados_residenciais(dados_excel)
-       cadastro_dados_risco_elevado(dados_excel)
-       cadastro_aba_mamografia(dados_excel)
-      
+        cadastro_dados_paciente(paciente)
+        cadastro_dados_residenciais(paciente)
+        cadastro_dados_risco_elevado(paciente)
+        cadastro_aba_mamografia(paciente)
+        save_cadastro_paciente()
+        recuperar_retorno_envio_cadastro()
     except Exception as e: 
         print(f"Erro ao processar os dados do excel: {e}")  
-        
+
 def tratativa_risco(risco):
     try:
         #não há risco 
@@ -102,16 +114,19 @@ def tratativa_risco(risco):
 def cadastro_dados_paciente(dados_excel):
     try: 
         #campos
-        cartao_sus = dados_excel.loc[0,'cartao sus']
-        nome = dados_excel.loc[0, 'nome']
-        sexo = dados_excel.loc[0, 'sexo']
-        nome_mae = dados_excel.loc[0, 'mae']
-        orgao_emissor = dados_excel.loc[0, 'orgao emissor']
-        identidade = dados_excel.loc[0, 'identidade']
-        cpf = dados_excel.loc[0, 'cpf']
-        idade = dados_excel.loc[0, 'idade']
-        nacionalidade = dados_excel.loc[0, 'nacionalidade']
-        raca_cor = dados_excel.loc[0, 'raça']
+        cartao_sus = dados_excel['cartao sus']
+        nome = dados_excel['nome']
+        sexo = dados_excel['sexo']
+        nome_mae = dados_excel['mae']
+        orgao_emissor = dados_excel['orgao emissor']
+        identidade = dados_excel['identidade']
+        cpf = dados_excel['cpf']
+        idade = dados_excel['idade']
+        nacionalidade = dados_excel['nacionalidade']
+        raca_cor = dados_excel['raça']
+        
+        success = True 
+        dados_retorno_csv.append((nome, cpf, success))
         
         #cartao sus
         pyautogui.click(418,100)
@@ -127,7 +142,7 @@ def cadastro_dados_paciente(dados_excel):
         #nome
         pyautogui.click(581,119)
         pyautogui.write(nome, interval=0.1)
-        
+    
         time.sleep(0.5)
         
         tratativa_sexo(sexo)
@@ -156,7 +171,7 @@ def cadastro_dados_paciente(dados_excel):
         pyautogui.click(421,187)
         pyautogui.write(str(cpf), interval=0.1) 
         
-        time.sleep(3)
+        time.sleep(0.5)
     
         #idade
         pyautogui.click(699,191)
@@ -180,11 +195,13 @@ def cadastro_dados_paciente(dados_excel):
 def cadastro_dados_residenciais(dados_excel):
     try: 
         #campos
-        endereco = dados_excel.loc[0, 'endereço']
-        numero = dados_excel.loc[0, 'numero']
-        uf = dados_excel.loc[0, 'uf']
-        municipio = dados_excel.loc[0, 'municipio']
-        telefone = dados_excel.loc[0, 'telefone']
+        endereco = dados_excel['endereço']
+        numero = dados_excel['numero']
+        uf = dados_excel['uf']
+        municipio = dados_excel['municipio']
+        telefone = dados_excel['telefone']
+        
+        print(municipio)
         
         time.sleep(0.5)
         
@@ -202,15 +219,18 @@ def cadastro_dados_residenciais(dados_excel):
         
         #uf 
         pyautogui.click(849,298)
+        time.sleep(0.2)
         pyautogui.write(uf, interval=0.1)
         pyautogui.press('enter') 
         
         time.sleep(0.5)
         
         #municipio 
-        pyautogui.click(472,310)
-        pyautogui.write(municipio, interval=0.1)
+        pyautogui.click(571,31)
+        pyautogui.typewrite('guarulhos', interval=0.9)
+        time.sleep(0.5)
         pyautogui.press('enter') 
+        time.sleep(0.5)
         
         #telefone
         pyautogui.click(787,315) #confirmar coordenada
@@ -222,7 +242,7 @@ def cadastro_dados_residenciais(dados_excel):
 def cadastro_dados_risco_elevado(dados_excel):
     try: 
         # Campos
-        risco_elevado = dados_excel.loc[0, 'risco']
+        risco_elevado = dados_excel['risco']
         
         tratativa_risco(risco_elevado)
 
@@ -269,15 +289,15 @@ import pyautogui
 def cadastro_aba_mamografia(dados_excel):
     try:
         # Campos
-        cnes = dados_excel.loc[0, 'cnes']
-        servico_radiologico = dados_excel.loc[0, 'serviço radiologico']
-        localizacao_mama = dados_excel.loc[0, 'localizacao mama']
-        tipo_mamografia = dados_excel.loc[0, 'tipo mamografia']
-        numero_exame = dados_excel.loc[0, 'numero exame']
-        mama_direita = dados_excel.loc[0, 'mama direita']
-        mama_esquerda = dados_excel.loc[0, 'mama esquerda']
-        categoria_direita = dados_excel.loc[0, 'categoria direita']
-        categoria_esquerda = dados_excel.loc[0, 'categoria esquerda']
+        cnes = dados_excel['cnes']
+        servico_radiologico = dados_excel['serviço radiologico']
+        localizacao_mama = dados_excel['localizacao mama']
+        tipo_mamografia = dados_excel['tipo mamografia']
+        numero_exame = dados_excel['numero exame']
+        mama_direita = dados_excel['mama direita']
+        mama_esquerda = dados_excel['mama esquerda']
+        categoria_direita = dados_excel['categoria direita']
+        categoria_esquerda = dados_excel['categoria esquerda']
         
         #CNES
         pyautogui.click(408, 447)
@@ -285,10 +305,9 @@ def cadastro_aba_mamografia(dados_excel):
         pyautogui.press('enter') 
           
         # Serviço radiologico
-        pyautogui.click(936, 438)
-        pyautogui.click(936, 438)
-        # pyautogui.write(str(servico_radiologico), interval=0.1)
-        # pyautogui.press('enter') 
+        pyautogui.click(1031, 438)
+        time.sleep(0.5)
+        pyautogui.click(966, 457)
         
         tratativa_localizacao_mamografia(localizacao_mama)
         tratativa_tipo_mamografia(tipo_mamografia)
@@ -397,8 +416,75 @@ def tratativa_categoria_mamografia_esquerda(categoria):
     
     except Exception as e: 
         print(f"Erro ao tratar os dados do paciente - Aba mamografia (Categoria Mama esquerda) {e}")
+    
+def save_cadastro_paciente():
+    try:
+            pyautogui.moveTo(997,152)
+            pyautogui.click()
+            time.sleep(2)
+    except Exception as e: 
+        print(f"Erro ao tentar salvar o cadastro do paciente. {e}")
+
+def recuperar_retorno_envio_cadastro():
+    try:
+        global dados_retorno_csv 
+        processo = 'Cadastro de Paciente'
+        data_hora_atual = datetime.datetime.now()
         
+        time.sleep(3)
+        confirmation_message = pyautogui.locateOnScreen('retornoCadastroPaciente.png')
+        if confirmation_message:
+            message_x, message_y = pyautogui.center(confirmation_message)
+            print(f"Mensagem de confirmação do cadastro do paciente")
+            success = True
+        else:
+            print("Mensagem de confirmação do cadastro do paciente não encontrada.")
+            success = False
+            
+        if dados_retorno_csv:
+           dados_retorno_csv[-1] += (processo, localizacao_sismama, data_hora_atual, success)
+            
+    except Exception as e: 
+        print(f"Erro ao tentar recuperar o retorno do cadastro realizado. {e}")
         
+def gerar_csv_retorno():
+    try:
+        data_hora_atual = datetime.datetime.now()
+        diretorio_destino = "csvSismama"
+        nome_arquivo = "../"+ diretorio_destino + "/cadastro_paciente_" + data_hora_atual.strftime("%Y-%m-%d_%H-%M-%S") + ".csv"
+        cabecalho = ['Processo', 'Nome Paciente', 'CPF','Localidade', 'Data e Hora', 'Status']
+        with open(nome_arquivo, 'w', newline='') as arquivo_csv:
+            escritor_csv = csv.writer(arquivo_csv)
+            if cabecalho:
+                escritor_csv.writerow(cabecalho)
+            for linha in dados_retorno_csv:
+                escritor_csv.writerow(linha)
+   
+    except Exception as e: 
+        print(f"Erro ao tentar gerar o csv com o retorno do RPA. {e}")
+        
+def recuperar_localizacao_sismama():
+    global localizacao_sismama
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    try:
+          posicao_localizacao = pyautogui.locateOnScreen('localizacao.png')
+          if posicao_localizacao:
+            # Obtenha as coordenadas da posição
+            x, y, largura, altura = posicao_localizacao
+
+            # Tire uma captura de tela da região onde o texto está localizado
+            imagem = pyautogui.screenshot(region=(x, y, largura, altura))
+            time.sleep(0.5)
+            
+            # Use OCR para ler o texto da imagem
+            localizacao_sismama = pytesseract.image_to_string(imagem)
+            
+            time.sleep(0.5)
+
+    except Exception as e: 
+        print(f"Erro ao tentar recuperar a localização do sismama. {e}")
+
+
 if __name__ == "__main__":
     # Caminho para o programa que você deseja abrir como administrador
     caminho_programa = r'C:\datasus\SisMamaFB\SisMamaFB.exe'
@@ -421,10 +507,10 @@ if __name__ == "__main__":
 
     # Executando o programa como administrador
     run_as_admin(caminho_programa)
+    recuperar_localizacao_sismama()
     menu_item_position()
     menu_item_seguimento()
-    novo_cadastro_paciente()
-    dados_excel = excel_dados_paciente()
-    dados_processamento_excel(dados_excel)
+    processar_pacientes_csv()
+    gerar_csv_retorno()
     
     
