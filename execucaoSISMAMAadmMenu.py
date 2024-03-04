@@ -3,6 +3,7 @@ import time
 from pyautogui import moveTo, click, position
 import pyautogui
 from pywinauto.application import Application
+from pywinauto import Desktop
 import pandas as pd 
 import datetime
 import csv
@@ -126,7 +127,7 @@ def cadastro_dados_paciente(dados_excel):
         raca_cor = dados_excel['raça']
         
         success = True 
-        dados_retorno_csv.append((nome, cpf, success))
+        dados_retorno_csv.append((nome, cpf))
         
         #cartao sus
         pyautogui.click(418,100)
@@ -201,9 +202,11 @@ def cadastro_dados_residenciais(dados_excel):
         municipio = dados_excel['municipio']
         telefone = dados_excel['telefone']
         
-        print(municipio)
+        # time.sleep(5)
         
-        time.sleep(0.5)
+        # posicao = pyautogui.position()
+        # print(posicao)
+        
         
         #endereco
         pyautogui.click(429,268)
@@ -226,10 +229,11 @@ def cadastro_dados_residenciais(dados_excel):
         time.sleep(0.5)
         
         #municipio 
-        pyautogui.click(571,31)
+        pyautogui.click(571,313)
         pyautogui.typewrite('guarulhos', interval=0.9)
         time.sleep(0.5)
         pyautogui.press('enter') 
+
         time.sleep(0.5)
         
         #telefone
@@ -436,13 +440,13 @@ def recuperar_retorno_envio_cadastro():
         if confirmation_message:
             message_x, message_y = pyautogui.center(confirmation_message)
             print(f"Mensagem de confirmação do cadastro do paciente")
-            success = True
+            success = 'Integrado com sucesso'
         else:
             print("Mensagem de confirmação do cadastro do paciente não encontrada.")
-            success = False
+            success = 'Falha ao cadastrar paciente'
             
         if dados_retorno_csv:
-           dados_retorno_csv[-1] += (processo, localizacao_sismama, data_hora_atual, success)
+           dados_retorno_csv[-1] += (processo, localizacao_sismama, data_hora_atual,success)
             
     except Exception as e: 
         print(f"Erro ao tentar recuperar o retorno do cadastro realizado. {e}")
@@ -452,7 +456,7 @@ def gerar_csv_retorno():
         data_hora_atual = datetime.datetime.now()
         diretorio_destino = "csvSismama"
         nome_arquivo = "../"+ diretorio_destino + "/cadastro_paciente_" + data_hora_atual.strftime("%Y-%m-%d_%H-%M-%S") + ".csv"
-        cabecalho = ['Processo', 'Nome Paciente', 'CPF','Localidade', 'Data e Hora', 'Status']
+        cabecalho = ['Nome Paciente', 'CPF', 'Processo','Municipio', 'Data e Hora', 'Status']
         with open(nome_arquivo, 'w', newline='') as arquivo_csv:
             escritor_csv = csv.writer(arquivo_csv)
             if cabecalho:
